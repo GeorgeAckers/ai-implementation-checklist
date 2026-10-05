@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Implementation Checklist</title>
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<meta name="description" content="A free 49-step interactive checklist from EverythingAI for implementing AI in your business.">
+<style>
+/* Layout: sticky progress rail on the left (summary first), nine sequential phases on the right; rail stacks on top on phones */
+/* EverythingAI brand: deliberately dark-only, matching the website and the white-text logo */
+:root {
+  --bg: #060911;
+  --surface: #0F1524;
+  --inset: #0A0F1C;
+  --ink: #F5F7FB;
+  --muted: #93A1BE;
+  --line: #1E2A44;
+  --accent: #2F8CFF;
+  --accent-light: #6FC3FF;
+  --accent-ink: #FFFFFF;
+  --accent-soft: rgba(47,140,255,.15);
+  --gradient: linear-gradient(135deg, #6FC3FF, #2F8CFF 60%, #1657C4);
+  --good: #3DD68C;
+  --good-soft: rgba(61,214,140,.13);
+  --warm: #FFB547;
+  --warm-soft: rgba(255,181,71,.13);
+  --shadow: 0 20px 60px -20px rgba(0,0,0,.55);
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.55; padding-inline: 16px; padding-block: 0 64px; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.mobilebar { display: none; }
+
+.shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 40px; align-items: start; padding-top: 40px; }
+
+/* Rail */
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); display: flex; flex-direction: column; gap: 20px; }
+.eyebrow { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-light); font-weight: 600; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 38px; line-height: 1.02; letter-spacing: -.02em; margin: 6px 0 10px; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; font-size: 15px; }
+
+.scorecard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 16px; }
+.score-top { display: flex; align-items: center; gap: 18px; }
+.ring { width: 96px; height: 96px; flex: none; position: relative; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .track { fill: none; stroke: var(--line); stroke-width: 9; }
+.ring .bar { fill: none; stroke: url(#ringgrad); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+.ring.complete .bar { stroke: var(--good); }
+.ring-label { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; }
+.stage-name { font-family: var(--f-display); font-weight: 700; font-size: 20px; line-height: 1.15; }
+.stage-sub { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { background: var(--inset); border-radius: 10px; padding: 10px 12px; }
+.stat b { display: block; font-family: var(--f-display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.stat span { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.next { border-top: 1px solid var(--line); padding-top: 14px; }
+.next .eyebrow { color: var(--muted); }
+.next button { all: unset; cursor: pointer; display: block; margin-top: 4px; font-weight: 700; color: var(--ink); line-height: 1.35; }
+.next button:hover { color: var(--accent-light); }
+.next button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.phase-nav { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.phase-nav a { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 14.5px; }
+.phase-nav a:hover { background: var(--surface); }
+.brand { display: block; width: 200px; max-width: 70%; height: auto; margin: 0 0 18px -6px; }
+.grad { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.phase-nav .num { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.phase-nav .cnt { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.phase-nav a.done .num, .phase-nav a.done .cnt { color: var(--good); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--gradient); color: var(--accent-ink); border-color: transparent; }
+.btn.danger { color: var(--warm); }
+.confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; background: var(--warm-soft); border-radius: 10px; padding: 10px 12px; }
+.savenote { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+/* Main */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.filters { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.filters button { border: 0; background: none; border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer; color: var(--muted); font-weight: 700; }
+.filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.legend { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+
+.phases { display: flex; flex-direction: column; gap: 16px; }
+.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; scroll-margin-top: 24px; }
+.phase-head { width: 100%; text-align: left; border: 0; background: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 16px; align-items: center; padding: 18px 20px; }
+.phase-num { font-family: var(--f-mono); font-weight: 600; font-size: 13px; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-light); }
+.phase.done .phase-num { background: var(--good-soft); color: var(--good); }
+.phase-title { font-family: var(--f-display); font-weight: 700; font-size: 21px; line-height: 1.2; letter-spacing: -.01em; }
+.phase-blurb { color: var(--muted); font-size: 14.5px; margin-top: 2px; }
+.phase-meter { display: flex; align-items: center; gap: 10px; }
+.meter { width: 72px; height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--gradient); border-radius: 99px; transition: width .4s ease; }
+.phase.done .meter i { background: var(--good); }
+.phase-count { font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+.chev { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); margin: 0 4px 4px 6px; transition: transform .2s; }
+.phase[data-open="false"] .chev { transform: rotate(-45deg); margin-bottom: 0; }
+
+.items { list-style: none; margin: 0; padding: 0 0 6px; border-top: 1px solid var(--line); }
+.item { border-bottom: 1px solid var(--line); padding: 14px 20px; }
+.item:last-child { border-bottom: 0; }
+.row { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 14px; align-items: start; }
+.cb { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; margin: 1px 0 0; border: 2px solid var(--muted); border-radius: 6px; cursor: pointer; position: relative; background: var(--surface); transition: background .15s, border-color .15s; }
+.cb:hover { border-color: var(--accent); }
+.cb:checked { background: var(--good); border-color: var(--good); }
+.cb:checked::after { content: ""; position: absolute; left: 6px; top: 2px; width: 6px; height: 11px; border: solid var(--surface); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+.title-wrap { min-width: 0; }
+.title { cursor: pointer; font-weight: 700; line-height: 1.4; }
+.item.checked .title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); text-decoration-thickness: 2px; }
+.tag { display: inline-block; vertical-align: 2px; margin-left: 8px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; padding: 2px 7px; border-radius: 99px; background: var(--warm-soft); color: var(--warm); }
+.has-note { display: inline-block; vertical-align: 2px; margin-left: 6px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-light); }
+.more { border: 1px solid var(--line); background: none; border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.more:hover, .more[aria-expanded="true"] { color: var(--accent-light); border-color: var(--accent); }
+.detail { margin: 12px 0 2px 38px; display: flex; flex-direction: column; gap: 10px; max-width: 68ch; }
+.detail p { margin: 0; color: var(--ink); font-size: 15px; }
+.detail .eg { color: var(--muted); font-size: 14.5px; border-left: 3px solid var(--accent-soft); padding-left: 12px; }
+.detail label { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.detail textarea { width: 100%; min-height: 72px; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--inset); font-size: 15px; }
+.empty { padding: 18px 20px; color: var(--muted); border-top: 1px solid var(--line); font-size: 15px; }
+
+/* Finish line */
+.finale { margin-top: 28px; border-radius: 18px; padding: 32px 28px; border: 2px dashed var(--line); background: var(--surface); display: grid; grid-template-columns: auto minmax(0,1fr); gap: 24px; align-items: center; }
+.finale.won { border: 2px solid var(--good); background: linear-gradient(160deg, var(--good-soft), var(--surface) 70%); }
+.medal { width: 108px; height: 108px; flex: none; }
+.medal .disc { fill: var(--line); }
+.medal .rim { fill: none; stroke: var(--muted); stroke-width: 3; stroke-dasharray: 4 6; }
+.medal .mark { fill: none; stroke: var(--surface); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.medal .lock { fill: var(--muted); }
+.medal .shackle { fill: none; stroke: var(--muted); stroke-width: 6; stroke-linecap: round; }
+.won .medal .disc { fill: var(--good); }
+.won .medal .rim { stroke: var(--good); stroke-dasharray: none; stroke-width: 4; }
+.won .medal { animation: pop .6s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes pop { from { transform: scale(.6) rotate(-12deg); } to { transform: none; } }
+.finale h2 { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1.08; letter-spacing: -.02em; margin: 4px 0 8px; text-wrap: balance; }
+.finale p { margin: 0; color: var(--muted); max-width: 60ch; }
+.finale .won-date { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--good); margin-top: 10px; }
+.finale .eyebrow.locked { color: var(--muted); }
+.finale.won .eyebrow { color: var(--good); }
+.finale-meter { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.finale-meter .meter { width: 180px; max-width: 100%; height: 8px; }
+.nextsteps { margin: 16px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.nextsteps li { display: grid; grid-template-columns: 26px minmax(0,1fr); gap: 8px; color: var(--ink); font-size: 15px; }
+.nextsteps li b { font-family: var(--f-mono); font-size: 12.5px; color: var(--good); padding-top: 2px; }
+.finale .actions { margin-top: 18px; }
+.btn.win { background: var(--good); border-color: var(--good); color: var(--surface); }
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+@media (max-width: 560px) {
+  .finale { grid-template-columns: minmax(0,1fr); padding: 24px 18px; gap: 16px; }
+  .medal { width: 84px; height: 84px; }
+  .finale h2 { font-size: 25px; }
+}
+
+.toast { position: fixed; box-shadow: 0 0 0 1px var(--line), var(--shadow); left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--surface); color: var(--ink); padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 15px; transition: opacity .25s, transform .25s; max-width: calc(100% - 32px); text-align: center; z-index: 20; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 920px) {
+  .shell { grid-template-columns: minmax(0,1fr); gap: 28px; padding-top: 20px; }
+  .rail { position: static; }
+  .phase-nav { display: none; }
+  .mobilebar { display: flex; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; margin: 0 -16px; padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--line); align-items: center; gap: 12px; font-family: var(--f-mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .mobilebar .meter { flex: 1; width: auto; }
+}
+@media (max-width: 560px) {
+  h1 { font-size: 32px; }
+  .phase-head { grid-template-columns: auto minmax(0,1fr); padding: 16px; gap: 12px; }
+  .phase-meter { grid-column: 2; }
+  .item { padding: 14px 16px; }
+  .row { grid-template-columns: 24px minmax(0,1fr); }
+  .more { grid-column: 2; justify-self: start; }
+  .detail { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="mobilebar" aria-hidden="true"><span id="mb-pct">0%</span><div class="meter"><i id="mb-bar" style="width:0%"></i></div><span id="mb-count">0/0</span></div>
+
+<div class="shell">
+  <aside class="rail">
+    <div>
+      <img class="brand" src="data:image/png;base64,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" alt="EverythingAI" width="342" height="87">
+      <div class="eyebrow">Free community resource</div>
+      <h1><span class="grad">AI</span> Implementation Checklist</h1>
+      <p class="lede">Nine phases that take a business from "we should use AI" to tools that save real time, with the team on board and the risks handled. Tick items off as you go.</p>
+    </div>
+
+    <section class="scorecard" aria-label="Your progress">
+      <div class="score-top">
+        <div class="ring" id="ring">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="ringgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6FC3FF"></stop><stop offset="1" stop-color="#1657C4"></stop></linearGradient></defs><circle class="track" cx="50" cy="50" r="42"></circle><circle class="bar" id="ring-bar" cx="50" cy="50" r="42"></circle></svg>
+          <div class="ring-label" id="pct">0%</div>
+        </div>
+        <div>
+          <div class="stage-name" id="stage">Getting started</div>
+          <div class="stage-sub" id="count">0 of 0 steps done</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="ess">0/0</b><span>Essentials</span></div>
+        <div class="stat"><b id="phases-done">0/9</b><span>Phases done</span></div>
+      </div>
+      <div class="next" id="next-wrap">
+        <div class="eyebrow">Up next</div>
+        <button type="button" id="next-btn"></button>
+      </div>
+    </section>
+
+    <ul class="phase-nav" id="phase-nav"></ul>
+
+    <div class="actions" id="actions">
+      <button type="button" class="btn primary" id="share">Copy my progress</button>
+      <button type="button" class="btn" id="expand">Expand all</button>
+      <button type="button" class="btn danger" id="reset">Reset</button>
+    </div>
+    <div class="confirm" id="confirm" hidden>
+      <span>Clear every tick and note?</span>
+      <button type="button" class="btn danger" id="reset-yes">Yes, reset</button>
+      <button type="button" class="btn" id="reset-no">Cancel</button>
+    </div>
+    <p class="savenote" id="savenote">Your ticks and notes save automatically in this browser.</p>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="Show">
+        <button type="button" data-filter="all" aria-pressed="true">All</button>
+        <button type="button" data-filter="todo" aria-pressed="false">To do</button>
+        <button type="button" data-filter="done" aria-pressed="false">Done</button>
+        <button type="button" data-filter="essential" aria-pressed="false">Essentials</button>
+      </div>
+      <div class="legend"><span class="tag" style="margin:0">Essential</span> Don't skip these</div>
+    </div>
+    <div class="phases" id="phases"></div>
+    <section class="finale" id="finale" aria-live="polite"></section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const PHASES = [
+  { name: "Set your direction", blurb: "Decide what AI is for before choosing any tool.", items: [
+    { t: "Write down the 3 biggest bottlenecks costing you time or money", e: 1, d: "Start with problems, not tools. Ask: where do we lose hours every week, where do leads slip through, what do customers wait on?", x: "Example: \"We take 6+ hours a day answering the same 20 customer questions.\"" },
+    { t: "Turn each bottleneck into a measurable goal", e: 1, d: "A goal needs a number and a deadline so you can tell later whether AI actually worked.", x: "Example: cut average email response time from 4 hours to 30 minutes within 90 days." },
+    { t: "Set a budget range and timeframe", d: "Include tool subscriptions, usage costs, setup help and the hours your team will spend learning. A rough range is fine at this stage." },
+    { t: "Name one person who owns the AI rollout", e: 1, d: "Projects without an owner stall. This person drives decisions, tracks progress and is the go-to for questions. It can be you." },
+    { t: "Get buy-in from partners, managers or key staff", d: "Share the problems and goals, not the tech. People back outcomes they understand." }
+  ]},
+  { name: "Audit your workflows", blurb: "Find where AI will make the biggest difference.", items: [
+    { t: "Map your core processes step by step", e: 1, d: "Cover sales, marketing, delivery, customer support and admin. A simple list of steps per process in a doc or whiteboard is enough." },
+    { t: "Track time spent on repetitive tasks for one week", d: "Ask the team to log recurring tasks and roughly how long they take. Real numbers beat guesses and give you a baseline for ROI later." },
+    { t: "Score each task for AI fit", d: "Rate 1 to 5 on: how often it happens, how repetitive it is, how rule-based it is, and how costly a mistake would be. High volume, repetitive and low risk scores best.", x: "Good fits: drafting emails, summarising calls, first-line support, content repurposing, data entry, research." },
+    { t: "Sort opportunities into quick wins and bigger bets", d: "Quick wins are high impact, low risk and need no custom build. Bigger bets need integrations, data work or more change for the team." },
+    { t: "Choose 1 or 2 use cases to start with", e: 1, d: "Resist doing everything at once. One success builds confidence and budget for the next." }
+  ]},
+  { name: "Get your data and security ready", blurb: "Protect your customers and your business first.", items: [
+    { t: "List where your business data lives", d: "CRM, email, shared drives, spreadsheets, accounting, support desk. Note which systems your chosen use case needs to touch." },
+    { t: "Clean up the data your first use case depends on", d: "AI is only as good as what you give it. Remove duplicates, update outdated docs and fill gaps in FAQs or SOPs it will draw from." },
+    { t: "Decide what data must never go into AI tools", e: 1, d: "Classify sensitive information: customer personal details, payment data, health records, passwords, confidential contracts. Write this list down; it goes into your AI policy." },
+    { t: "Check each vendor's data policy", e: 1, d: "Find out whether they train on your data, how long they keep it, where it is stored and whether you can delete it. Business or team plans often switch off training by default." },
+    { t: "Confirm your legal and compliance obligations", d: "Check GDPR or local privacy law, industry rules and client contracts. Update your privacy policy if AI will process customer data." },
+    { t: "Secure every AI account", d: "Use company-owned accounts (not personal ones), turn on two-factor authentication and give access only to people who need it." }
+  ]},
+  { name: "Choose your tools", blurb: "Pick the simplest tool that solves the problem.", items: [
+    { t: "Decide between build and buy", e: 1, d: "Options from simplest to most complex: an AI feature inside a tool you already use, a general AI assistant, an automation platform connecting your apps, or a custom-built solution. Start as simple as possible." },
+    { t: "Shortlist 2 or 3 tools for each use case", d: "Ask peers in the community what they use, read recent reviews and check that the tool is actively maintained." },
+    { t: "Check integrations with your existing stack", d: "The tool should connect to where work already happens (email, CRM, calendar, Slack, website). Tools that sit in a separate tab tend to get forgotten." },
+    { t: "Work out the true total cost", d: "Seats, usage or credit limits, setup time, paid integrations and ongoing maintenance. Compare against the hours you expect to save." },
+    { t: "Trial each tool with real, non-sensitive examples", e: 1, d: "Use free trials on your actual tasks, not demo content. Compare output quality side by side before you commit." }
+  ]},
+  { name: "Run a pilot", blurb: "Prove it works on a small scale before you roll it out.", items: [
+    { t: "Define pilot scope, length and success criteria", e: 1, d: "Keep it tight: one use case, a small group, 2 to 6 weeks, and a clear pass mark tied to your goal from phase 1." },
+    { t: "Record baseline numbers before you start", e: 1, d: "Time per task, response times, error rates, output volume. Without a baseline you cannot prove improvement." },
+    { t: "Pick a small pilot group, including a sceptic", d: "Enthusiasts find the upside. A sceptic finds the problems early, and their approval carries weight with the rest of the team." },
+    { t: "Write prompts and step-by-step instructions for the task", d: "Document exactly how to use the tool for this job: which prompts or templates, what to check, where the output goes." },
+    { t: "Keep a human reviewing every output during the pilot", e: 1, d: "AI can sound confident and still be wrong. Nothing customer-facing goes out unchecked until you trust the quality." },
+    { t: "Collect feedback and log mistakes each week", d: "A shared doc or form is enough: what worked, what did not, time saved, any errors." },
+    { t: "Decide to scale, adjust or stop", d: "Compare results against your success criteria. Stopping a pilot that did not work is a good outcome; you learned cheaply." }
+  ]},
+  { name: "Prepare your team", blurb: "Adoption is a people project as much as a tech one.", items: [
+    { t: "Explain why you are introducing AI", e: 1, d: "Be open about the goal and address job worries directly. Frame AI as removing the boring parts of roles so people can focus on higher-value work." },
+    { t: "Write a simple AI usage policy", e: 1, d: "One page covering: approved tools, data that must never be entered, when human review is required, and when to tell customers AI was involved." },
+    { t: "Run hands-on training using real tasks", d: "Short sessions where people use the tool on their own work beat generic tutorials. Record them for new starters." },
+    { t: "Build a shared prompt and template library", d: "Store the prompts that work in one place everyone can access and improve. This is how individual wins become team wins." },
+    { t: "Create a space for questions and sharing wins", d: "A dedicated channel or a regular 15-minute slot in team meetings keeps momentum and surfaces problems early." }
+  ]},
+  { name: "Roll it out", blurb: "Expand in stages and make AI part of the normal workflow.", items: [
+    { t: "Roll out in stages by team or use case", d: "Expand from the pilot group one team at a time so support needs stay manageable." },
+    { t: "Integrate AI into the tools people already use", d: "Connect it to email, CRM or chat so it shows up where work happens rather than as an extra step." },
+    { t: "Update your SOPs to show where AI fits", e: 1, d: "Each process doc should state which steps AI handles and which steps a human checks or approves." },
+    { t: "Set up a clear path for when AI gets it wrong", e: 1, d: "Who gets notified, how the mistake is fixed, and how a customer reaches a real person when they need one." },
+    { t: "Tell customers where AI is involved, where relevant", d: "Be upfront about chatbots and AI-assisted content. Transparency protects trust and is a legal requirement in some regions." }
+  ]},
+  { name: "Measure and improve", blurb: "Prove the return and make it better every month.", items: [
+    { t: "Track your goal numbers against the baseline monthly", e: 1, d: "Use the same measures you recorded before the pilot so the comparison is fair." },
+    { t: "Calculate your ROI", e: 1, d: "Hours saved per month times hourly cost, plus any extra revenue, minus tool and running costs.", x: "Example: 40 hours saved × £25 = £1,000 a month, minus £150 in tools = £850 a month return." },
+    { t: "Spot-check output quality regularly", d: "Review a sample of AI-assisted work each week or month. Quality can drift as tools update or tasks change." },
+    { t: "Monitor adoption across the team", d: "Who is using it, who is not, and why? Low adoption usually points to a training gap or a tool that does not fit the workflow." },
+    { t: "Refine prompts and workflows based on what you learn", d: "Small tweaks to instructions and templates often give big quality gains. Update the shared library when you do." },
+    { t: "Pick your next use case from the audit list", d: "Go back to your phase 2 scores and start the cycle again with the next best opportunity." }
+  ]},
+  { name: "Govern for the long term", blurb: "Keep it safe, current and owned as AI keeps changing.", items: [
+    { t: "Assign ongoing ownership for tools, policy and vendors", e: 1, d: "Someone needs to keep an eye on renewals, new features, policy updates and changes to vendor terms." },
+    { t: "Keep an inventory of every AI tool in use", d: "Record the tool, owner, cost, who has access and what data it touches. This stops shadow AI and surprise bills." },
+    { t: "Review your policy and tool stack every quarter", d: "AI tools change fast. A quarterly check catches better options, price changes and new risks." },
+    { t: "Have a backup plan for critical tools", d: "If a vendor raises prices, changes terms or shuts down, know how you would switch. Keep your prompts and data exportable." },
+    { t: "Share results and lessons across the business", d: "Celebrate wins publicly, share what did not work, and keep feeding ideas into the next round of improvements." }
+  ]}
+];
+PHASES.forEach((p, pi) => p.items.forEach((it, ii) => { it.id = "p" + (pi + 1) + "-" + (ii + 1); }));
+const ALL = PHASES.flatMap(p => p.items);
+const KEY = "ai-impl-checklist-v1";
+
+let state = { done: {}, notes: {}, closed: {}, filter: "all" };
+let storageOk = true;
+try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch (e) { storageOk = false; }
+const openDetails = new Set();
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { storageOk = false; showSaveNote(); }
+}
+function showSaveNote() {
+  if (!storageOk) document.getElementById("savenote").textContent = "This browser is blocking saved data, so progress will reset when you close the page.";
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const $ = id => document.getElementById(id);
+
+function visible(it) {
+  const f = state.filter, d = !!state.done[it.id];
+  return f === "all" || (f === "todo" && !d) || (f === "done" && d) || (f === "essential" && it.e);
+}
+
+function render() {
+  const wrap = $("phases");
+  wrap.innerHTML = PHASES.map((p, pi) => {
+    const pid = "phase-" + (pi + 1);
+    const open = !state.closed[pid];
+    const items = p.items.filter(visible);
+    const list = items.length ? `<ul class="items">${items.map(it => itemHTML(it)).join("")}</ul>`
+      : `<div class="empty">${state.filter === "done" ? "Nothing ticked in this phase yet." : state.filter === "todo" ? "Every step in this phase is done." : "No essentials in this phase."}</div>`;
+    return `<section class="phase" id="${pid}" data-open="${open}">
+      <button type="button" class="phase-head" aria-expanded="${open}" aria-controls="${pid}-body" data-toggle="${pid}">
+        <span class="phase-num">${String(pi + 1).padStart(2, "0")}</span>
+        <span><span class="phase-title" style="display:block">${esc(p.name)}</span><span class="phase-blurb" style="display:block">${esc(p.blurb)}</span></span>
+        <span class="phase-meter"><span class="meter"><i data-meter="${pi}"></i></span><span class="phase-count" data-count="${pi}"></span><span class="chev" aria-hidden="true"></span></span>
+      </button>
+      <div id="${pid}-body" ${open ? "" : "hidden"}>${list}</div>
+    </section>`;
+  }).join("");
+
+  $("phase-nav").innerHTML = PHASES.map((p, pi) =>
+    `<li><a href="#phase-${pi + 1}" data-nav="${pi}"><span class="num">${String(pi + 1).padStart(2, "0")}</span><span>${esc(p.name)}</span><span class="cnt" data-navcount="${pi}"></span></a></li>`).join("");
+
+  document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.filter === state.filter)));
+  $("expand").textContent = PHASES.every((p, pi) => !state.closed["phase-" + (pi + 1)]) ? "Collapse all" : "Expand all";
+  updateProgress();
+}
+
+function itemHTML(it) {
+  const d = !!state.done[it.id], open = openDetails.has(it.id), note = state.notes[it.id] || "";
+  return `<li class="item${d ? " checked" : ""}" data-id="${it.id}">
+    <div class="row">
+      <input type="checkbox" class="cb" id="cb-${it.id}" ${d ? "checked" : ""}>
+      <div class="title-wrap"><label class="title" for="cb-${it.id}">${esc(it.t)}</label>${it.e ? '<span class="tag">Essential</span>' : ""}${note.trim() ? '<span class="has-note">Note</span>' : ""}</div>
+      <button type="button" class="more" aria-expanded="${open}" aria-controls="detail-${it.id}" data-more="${it.id}">${open ? "Hide" : "How to"}</button>
+    </div>
+    <div class="detail" id="detail-${it.id}" ${open ? "" : "hidden"}>
+      <p>${esc(it.d)}</p>${it.x ? `<p class="eg">${esc(it.x)}</p>` : ""}
+      <label for="note-${it.id}">Your notes</label>
+      <textarea id="note-${it.id}" data-note="${it.id}" placeholder="Decisions, links, who's responsible...">${esc(note)}</textarea>
+    </div>
+  </li>`;
+}
+
+const STAGES = [
+  [0, "Getting started", "Every AI rollout starts with phase 1."],
+  [1, "Laying foundations", "Good start. Keep the momentum going."],
+  [25, "Building momentum", "You're past the planning stage."],
+  [50, "Halfway there", "Most businesses never get this far."],
+  [75, "Nearly AI-ready", "The finish line is in sight."],
+  [100, "AI-ready", "Every step complete. Time to pick the next use case."]
+];
+
+function updateProgress() {
+  const total = ALL.length, done = ALL.filter(i => state.done[i.id]).length;
+  const pct = Math.round(done / total * 100);
+  const ess = ALL.filter(i => i.e), essDone = ess.filter(i => state.done[i.id]).length;
+  let phasesDone = 0;
+  PHASES.forEach((p, pi) => {
+    const n = p.items.filter(i => state.done[i.id]).length, all = n === p.items.length;
+    if (all) phasesDone++;
+    const sec = $("phase-" + (pi + 1)); if (sec) sec.classList.toggle("done", all);
+    const m = document.querySelector(`[data-meter="${pi}"]`); if (m) m.style.width = (n / p.items.length * 100) + "%";
+    const c = document.querySelector(`[data-count="${pi}"]`); if (c) c.textContent = n + "/" + p.items.length;
+    const nc = document.querySelector(`[data-navcount="${pi}"]`); if (nc) nc.textContent = all ? "Done" : n + "/" + p.items.length;
+    const na = document.querySelector(`[data-nav="${pi}"]`); if (na) na.classList.toggle("done", all);
+  });
+  const C = 2 * Math.PI * 42, bar = $("ring-bar");
+  bar.style.strokeDasharray = C; bar.style.strokeDashoffset = C * (1 - done / total);
+  $("ring").classList.toggle("complete", done === total);
+  $("pct").textContent = pct + "%";
+  const stage = STAGES.filter(s => (done === 0 ? 0 : Math.max(pct, 1)) >= s[0]).pop();
+  $("stage").textContent = stage[1];
+  $("count").textContent = done + " of " + total + " steps done";
+  $("ess").textContent = essDone + "/" + ess.length;
+  $("phases-done").textContent = phasesDone + "/" + PHASES.length;
+  $("mb-pct").textContent = pct + "%"; $("mb-bar").style.width = pct + "%"; $("mb-count").textContent = done + "/" + total;
+
+  renderFinale(done, total);
+
+  const next = ALL.find(i => !state.done[i.id] && i.e) || ALL.find(i => !state.done[i.id]);
+  $("next-wrap").hidden = !next;
+  if (next) { $("next-btn").textContent = next.t; $("next-btn").dataset.target = next.id; }
+}
+
+let finaleWon = null;
+function renderFinale(done, total) {
+  const won = done === total, el = $("finale");
+  if (won === finaleWon && !won) {
+    const left = total - done;
+    $("fin-left").textContent = left + (left === 1 ? " step" : " steps") + " to go";
+    $("fin-bar").style.width = (done / total * 100) + "%";
+    return;
+  }
+  if (won === finaleWon) return;
+  finaleWon = won;
+  el.classList.toggle("won", won);
+  if (!won) {
+    const left = total - done;
+    el.innerHTML = `${medalSVG(false)}<div>
+      <div class="eyebrow locked">The finish line</div>
+      <h2>Your first AI system is waiting</h2>
+      <p>Tick off every step to unlock your finish-line badge and a ready-made post to celebrate your win with the community.</p>
+      <div class="finale-meter"><span class="meter"><i id="fin-bar" style="width:${done / total * 100}%"></i></span><span id="fin-left">${left} ${left === 1 ? "step" : "steps"} to go</span></div>
+    </div>`;
+    return;
+  }
+  const date = state.completedAt ? new Date(state.completedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "";
+  el.innerHTML = `${medalSVG(true)}<div>
+    <div class="eyebrow">Checklist complete</div>
+    <h2>Congrats on your first AI system!</h2>
+    <p>You set clear goals, protected your data, proved it in a pilot, brought your team with you and measured the return. Most businesses never get past the first phase. You built a working AI system and a process you can repeat.</p>
+    ${date ? `<div class="won-date">Completed ${esc(date)}</div>` : ""}
+    <ul class="nextsteps">
+      <li><b>01</b><span>Post your win in the community so others can learn from what you built.</span></li>
+      <li><b>02</b><span>Go back to your phase 2 audit and pick the next best use case.</span></li>
+      <li><b>03</b><span>Reset the checklist and run it again for system number two. It gets faster every time.</span></li>
+    </ul>
+    <div class="actions"><button type="button" class="btn win" id="share-win">Copy my win post</button><button type="button" class="btn" id="replay">Celebrate again</button></div>
+  </div>`;
+}
+function medalSVG(won) {
+  return `<svg class="medal" viewBox="0 0 120 120" aria-hidden="true">
+    <circle class="disc" cx="60" cy="60" r="48"></circle><circle class="rim" cx="60" cy="60" r="56"></circle>
+    ${won ? '<path class="mark" d="M40 61 L54 75 L82 45"></path>'
+          : '<rect class="lock" x="44" y="56" width="32" height="26" rx="5"></rect><path class="shackle" d="M50 57 V49 a10 10 0 0 1 20 0 V57"></path>'}
+  </svg>`;
+}
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cs = getComputedStyle(document.documentElement);
+  const colors = ["--accent", "--accent-light", "--good", "--ink"].map(v => cs.getPropertyValue(v).trim());
+  const c = document.createElement("canvas"); c.id = "confetti"; document.body.appendChild(c);
+  const ctx = c.getContext("2d"), dpr = window.devicePixelRatio || 1;
+  const W = c.width = innerWidth * dpr, H = c.height = innerHeight * dpr;
+  const bits = Array.from({ length: 160 }, () => ({
+    x: W / 2 + (Math.random() - .5) * W * .3, y: H * .35, vx: (Math.random() - .5) * 18 * dpr, vy: (-Math.random() * 16 - 6) * dpr,
+    w: (6 + Math.random() * 6) * dpr, h: (8 + Math.random() * 8) * dpr, r: Math.random() * 6, vr: (Math.random() - .5) * .3, col: colors[Math.floor(Math.random() * colors.length)]
+  }));
+  const start = performance.now();
+  (function frame(t) {
+    ctx.clearRect(0, 0, W, H);
+    bits.forEach(b => { b.vy += .45 * dpr; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r); ctx.fillStyle = b.col; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); ctx.restore(); });
+    if (t - start < 3500) requestAnimationFrame(frame); else c.remove();
+  })(start);
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+document.addEventListener("change", e => {
+  if (!e.target.classList.contains("cb")) return;
+  const li = e.target.closest(".item"), id = li.dataset.id, phaseIdx = PHASES.findIndex(p => p.items.some(i => i.id === id));
+  const before = PHASES[phaseIdx].items.every(i => state.done[i.id]);
+  if (e.target.checked) state.done[id] = true; else delete state.done[id];
+  li.classList.toggle("checked", e.target.checked);
+  const allDone = ALL.every(i => state.done[i.id]);
+  if (allDone) state.completedAt = state.completedAt || Date.now(); else delete state.completedAt;
+  save(); updateProgress();
+  const after = PHASES[phaseIdx].items.every(i => state.done[i.id]);
+  if (allDone) {
+    toast("Checklist complete. Your business is AI-ready!"); confetti();
+    setTimeout(() => $("finale").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" }), 400);
+  }
+  else if (after && !before) toast("Phase " + (phaseIdx + 1) + " complete: " + PHASES[phaseIdx].name);
+});
+
+document.addEventListener("input", e => {
+  const id = e.target.dataset && e.target.dataset.note; if (!id) return;
+  if (e.target.value.trim()) state.notes[id] = e.target.value; else delete state.notes[id];
+  save();
+});
+
+document.addEventListener("click", e => {
+  const tog = e.target.closest("[data-toggle]");
+  if (tog) {
+    const pid = tog.dataset.toggle, open = !state.closed[pid];
+    if (open) state.closed[pid] = true; else delete state.closed[pid];
+    save(); render(); document.querySelector(`[data-toggle="${pid}"]`).focus(); return;
+  }
+  const more = e.target.closest("[data-more]");
+  if (more) {
+    const id = more.dataset.more, det = $("detail-" + id), open = det.hidden;
+    det.hidden = !open; more.setAttribute("aria-expanded", String(open)); more.textContent = open ? "Hide" : "How to";
+    if (open) openDetails.add(id); else { openDetails.delete(id); refreshNoteBadge(id); }
+    return;
+  }
+  const fb = e.target.closest("[data-filter]");
+  if (fb) { state.filter = fb.dataset.filter; save(); render(); return; }
+  const nav = e.target.closest("[data-nav]");
+  if (nav) {
+    e.preventDefault(); const pid = "phase-" + (+nav.dataset.nav + 1);
+    if (state.closed[pid]) { delete state.closed[pid]; save(); render(); }
+    $(pid).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  }
+});
+
+function refreshNoteBadge(id) {
+  const li = document.querySelector(`.item[data-id="${id}"] .title-wrap`); if (!li) return;
+  let b = li.querySelector(".has-note"), has = (state.notes[id] || "").trim();
+  if (has && !b) li.insertAdjacentHTML("beforeend", '<span class="has-note">Note</span>');
+  if (!has && b) b.remove();
+}
+
+$("next-btn").addEventListener("click", () => {
+  const id = $("next-btn").dataset.target, pi = PHASES.findIndex(p => p.items.some(i => i.id === id));
+  const pid = "phase-" + (pi + 1);
+  if (state.closed[pid] || state.filter === "done") { delete state.closed[pid]; if (state.filter === "done") state.filter = "all"; save(); render(); }
+  openDetails.add(id); render();
+  const li = document.querySelector(`.item[data-id="${id}"]`);
+  li.scrollIntoView({ behavior: "smooth", block: "center" }); $("cb-" + id).focus({ preventScroll: true });
+});
+
+$("expand").addEventListener("click", () => {
+  const allOpen = PHASES.every((p, pi) => !state.closed["phase-" + (pi + 1)]);
+  PHASES.forEach((p, pi) => { if (allOpen) state.closed["phase-" + (pi + 1)] = true; else delete state.closed["phase-" + (pi + 1)]; });
+  save(); render();
+});
+
+$("reset").addEventListener("click", () => { $("confirm").hidden = false; $("reset-no").focus(); });
+$("reset-no").addEventListener("click", () => { $("confirm").hidden = true; $("reset").focus(); });
+$("reset-yes").addEventListener("click", () => {
+  state.done = {}; state.notes = {}; delete state.completedAt; openDetails.clear(); save(); render();
+  $("confirm").hidden = true; toast("Checklist reset");
+});
+
+function copyText(text, okMsg) {
+  const fallback = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); toast(ok ? okMsg : "Copy isn't available in this view"); };
+  try { navigator.clipboard.writeText(text).then(() => toast(okMsg), fallback); } catch (e) { fallback(); }
+}
+$("finale").addEventListener("click", e => {
+  if (e.target.id === "replay") confetti();
+  if (e.target.id === "share-win") copyText([
+    "I just finished all 49 steps of the AI Implementation Checklist and launched my first AI system!",
+    "",
+    "The system I built: [what it does]",
+    "The result so far: [time saved / ROI in £]",
+    "Biggest lesson: [one thing you learned]",
+    "",
+    "On to system number two."
+  ].join("\n"), "Win post copied. Fill in the brackets and post it!");
+});
+
+$("share").addEventListener("click", () => {
+  const total = ALL.length, done = ALL.filter(i => state.done[i.id]).length;
+  const cur = PHASES.findIndex(p => p.items.some(i => !state.done[i.id]));
+  const lines = ["My AI implementation progress: " + done + "/" + total + " steps (" + Math.round(done / total * 100) + "%)"];
+  PHASES.forEach((p, pi) => { const n = p.items.filter(i => state.done[i.id]).length; lines.push((n === p.items.length ? "[x] " : "[ ] ") + (pi + 1) + ". " + p.name + " (" + n + "/" + p.items.length + ")"); });
+  lines.push(cur === -1 ? "Every phase complete!" : "Working on: " + PHASES[cur].name);
+  const text = lines.join("\n");
+  const fallback = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); toast(ok ? "Copied. Paste it into the community!" : "Copy isn't available in this view"); };
+  try { navigator.clipboard.writeText(text).then(() => toast("Copied. Paste it into the community!"), fallback); } catch (e) { fallback(); }
+});
+
+showSaveNote();
+render();
+</script>
+</body>
+</html>
